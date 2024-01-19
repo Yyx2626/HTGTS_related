@@ -278,6 +278,7 @@ Usage: Rscript yyx_anno_underlying_features.20240105.r  <output_prefix> <should_
 ```
 Output:
 - `<output_prefix>`.bed
+
 Note:
 - For `<anno.bed>`, it will append four columns: (anno) count, density, highest signal, average signal
 - For `<anno.bdg|bw>`, it will append two columns: (anno) highest signal, average signal

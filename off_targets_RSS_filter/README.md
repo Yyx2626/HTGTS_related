@@ -14,16 +14,16 @@ Run `yyx_scan_RSS.20210102.pl` on your genome sequence, which will report all si
 Note: Because the inefficiency of this scanning script, it may take long time to scan for the whole genome. Therefore, if you are using a server with multiple CPUs, then you may separate the whole genome into each chromosome, run the scanning script on each chromosome in parallel, and finally concatenate the results.
 
 The output is in STDOUT, in tsv (tab-separated values) format (see Usage prompts section for the detailed description of each column and score definition), so you can redirect it into a output file, like
-```time perl scripts/yyx_scan_RSS.20210102.pl mm9.chr6.fa >scan_RSS_20201231/mm9.chr6.scan_RSS.tsv```
+```time perl yyx_scan_RSS.20210102.pl mm9.chr6.fa >mm9.chr6.scan_RSS.tsv```
 
 Then, use the following commands in bash to extract good RSS (with score >= 20) and convert into bed format
 ```
-time cat scan_RSS_20201231/mm9.chr6.scan_RSS.tsv | perl -ne 's/[\r\n]+$//; @F=split/\t/; $s=0; $n="";
+time cat mm9.chr6.scan_RSS.tsv | perl -ne 's/[\r\n]+$//; @F=split/\t/; $s=0; $n="";
  if($F[4]>=20){ $s=$F[4]; $n.=":F12RSS".$F[4]; }
  if($F[5]>=20){ if($F[5]>$s){ $s=$F[5]; } $n.=":F23RSS".$F[5]; }
  if($F[8]>=20){ if($F[8]>$s){ $s=$F[8]; } $n.=":R12RSS".$F[8]; }
  if($F[9]>=20){ if($F[9]>$s){ $s=$F[9]; } $n.=":R23RSS".$F[9]; }
- if($s > 0){ print join("\t", $F[0], $F[1], $F[1]+1, $F[2].$n, $s)."\n"; }' >scan_RSS_20201231/mm9.chr6.goodRSS_scoreGe20.bed
+ if($s > 0){ print join("\t", $F[0], $F[1], $F[1]+1, $F[2].$n, $s)."\n"; }' >mm9.chr6.goodRSS_scoreGe20.bed
 ```
 
 Note: RSS score >= 20 means: compared to the ideal RSS site (heptamer(CACAGTG) + 12/23-bp spacer + nonamer(ACAAAACC)), it requires CAC and addtional >= 9bp matches to the remaining ideal heptamer (AGTG) and nonamer in the context of a 12-or-23-bp spacer, i.e. at most 4bp mismatches to the ideal RSS site.
