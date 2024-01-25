@@ -5,9 +5,29 @@ Some scripts related to scanning cryptic RSS sites (CAC) on the genome, and filt
 Author: Adam Yongxin Ye @ Boston Children's Hospital / Harvard Medical School
 
 
+
+## Installation
+
+### Suggested Operation System (OS)
+
+Unlix-like, such as:
+- Linux
+- MacOS
+
+Prerequisite perl packages:
+- Text::CSV
+
+If users have not installed the required perl packages before, they may execute commands like `perl -MCPAN -e'install Text::CSV'` to install them (which may need sudo privilege or contact server administrator).
+
+Users can download and run these perl scripts by `perl xxx.pl` directly in this folder. Or users may move or copy the scripts into any of the folders in their PATH (environmental variable, which can be seen be `echo $PATH`), then the scripts can be directly run by `xxx.pl`.
+
+`yyx_tlx_filter_RSS.20211102.pl` will call tlxbedintersect (`robin_scripts/tlx2BED.pl` and `robin_scripts/pullTLXFromBED.pl`) and `yyx_HTGTS_align.20200831.pl`, which will further call `yyx_convert_tlx_to_bw.20200904.pl`.
+
+
+
 ## Pipeline
 
-### Step 1. Scan RSS sites starting with CAC
+### Step 0. Scan RSS sites starting with CAC
 
 Run `yyx_scan_RSS.20210102.pl` on your genome sequence, which will report all sites starting with CAC.
 
@@ -29,7 +49,7 @@ time cat mm9.chr6.scan_RSS.tsv | perl -ne 's/[\r\n]+$//; @F=split/\t/; $s=0; $n=
 Note: RSS score >= 20 means: compared to the ideal RSS site (heptamer(CACAGTG) + 12/23-bp spacer + nonamer(ACAAAACC)), it requires CAC and addtional >= 9bp matches to the remaining ideal heptamer (AGTG) and nonamer in the context of a 12-or-23-bp spacer, i.e. at most 4bp mismatches to the ideal RSS site.
 
 
-### Step 2. Classify V(D)J-HTGTS junctions as on-targets and off-targets, and filter out good RSS for off-targets
+### Step 1. Classify V(D)J-HTGTS junctions as on-targets and off-targets, and filter out good RSS for off-targets
 
 Run `yyx_tlx_filter_RSS.20211102.pl` (see Usage prompts section for details on command-line arguments) to annotate junctions as on-targets and off-targets, and filter out off-targets on good RSS sites
 
@@ -38,6 +58,32 @@ First, it will call tlxbedintersect (`robin_scripts/tlx2BED.pl` and `robin_scrip
 Then, it will call `yyx_HTGTS_align.20200831.pl` to align the noOnTarget junctions to nearby CAC sites, while `yyx_HTGTS_align.20200831.pl` will further call `yyx_convert_tlx_to_bw.20200904.pl` and `yyx_bdg_extract_multiply.20200120.pl`; the output file is `<output_prefix>.noOnTarget.slop_15_0.CACTGTG_GTG_aligned.tlx` (if baiting from CE (coding end)) or `<output_prefix>.noOnTarget.slop_0_15.CACAGTG_CAC_aligned.tlx` (if baiting from SE (signal end)).
 
 Finally, it will filter out the aligned noOnTarget junctions if located on the input `<goodRSS.bed>`; the final output file is `<output_prefix>.noOnTarget_CACaligned_noGoodRSS.tlx`.
+
+
+
+## Demo
+
+Run Step 1 for demo:
+```
+(date
+echo perl yyx_tlx_filter_RSS.20211102.pl demo/one_sample.tlx demo/one_sample demo/IgK_mm9_ontargetIntersect_40updownRSS.bed goodRSS_scoreGe20_examples/mm9.chr6.goodRSS_scoreGe20.bed ../demo_reference/mm9.fa CE robin_scripts
+time perl yyx_tlx_filter_RSS.20211102.pl demo/one_sample.tlx demo/one_sample demo/IgK_mm9_ontargetIntersect_40updownRSS.bed goodRSS_scoreGe20_examples/mm9.chr6.goodRSS_scoreGe20.bed ../demo_reference/mm9.fa CE robin_scripts
+date) 2>&1 | tee demo/one_sample.yyx_tlx_filter_RSS.log
+```
+It may take ten seconds or less than one minute to run through it.
+
+Check the number of lines of the demo results by `wc -l demo/one_sample.*.tlx`:
+```
+    1695 demo/one_sample.noOnTarget.slop_15_0.CACTGTG_GTG_aligned.tlx
+     361 demo/one_sample.noOnTarget.slop_15_0.CACTGTG_GTG_filtered.tlx
+    1695 demo/one_sample.noOnTarget.slop_15_0.CACTGTG_GTG_pass.tlx
+    2055 demo/one_sample.noOnTarget.slop_15_0.CACTGTG_GTG_shift.tlx
+    2055 demo/one_sample.noOnTarget.tlx
+     784 demo/one_sample.noOnTarget_CACaligned_noGoodRSS.tlx
+  111994 demo/one_sample.onTarget.tlx
+```
+
+Note: Due to file size limit (about 200MB) of github, I removed the genome file `../demo_reference/mm9.fa`. Users may download `mm9.fa.gz` from [UCSC](https://hgdownload.cse.ucsc.edu/goldenpath/mm9/bigZips/), then parse it to only keep the canonical chromosomes by `zless mm9.fa.gz | perl -ne 'BEGIN{ $so=0; } if(/^>/){ $so=0; if(/^>chr[^_]+$/){ $so=1; }} if($so){ print; }' >mm9.fa`, and generate fai index file by `samtools faidx mm9.fa`.
 
 
 

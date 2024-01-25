@@ -302,7 +302,6 @@ if(is.null(motif_sites_bed_filename) || !file.exists(motif_sites_bed_filename)){
 	print(system.time({
 	CATG_sites <- findMotifSites(ref_fa_filename, motif)
 	}))
-	CATG_sites = yyx_unlist_a_list_of_GRanges(CATG_sites)
 	CATG_sites = yyx_sort_GRanges(CATG_sites)
 	if(!is.null(motif_sites_bed_filename)){
 		cat("Now output motif sites to " %.% motif_sites_bed_filename %.% " ...\n")

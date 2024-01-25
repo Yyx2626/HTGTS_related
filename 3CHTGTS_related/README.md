@@ -5,17 +5,50 @@ Some scripts related to 3C-HTGTS normalization and peak calling
 Author: Adam Yongxin Ye @ Boston Children's Hospital / Harvard Medical School
 
 
+
+## Installation
+
+### Suggested Operation System (OS)
+
+Unlix-like, such as:
+- Linux
+- MacOS
+
+Prerequisite tools in PATH:
+- [bedtools](https://bedtools.readthedocs.io/en/latest/content/installation.html)
+- [bedGraphToBigWig](https://hgdownload.soe.ucsc.edu/admin/exe/)
+
+Prerequisite R packages:
+- tidyverse
+- [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html)
+- [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html)
+
+R packages like 'tidyverse' can be installed by `install.packages("tidyverse")` in R CMD
+
+Bioconductor packages like 'GenomicRanges' and 'Biostrings' can be installed according to their webpage, like:
+```
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("Biostrings")
+BiocManager::install("GenomicRanges")
+```
+
+
+
 ## Pipeline 1. 3C-HTGTS normalization
 
 Prerequisite tools in PATH:
 - bedtools
 - bedGraphToBigWig
 
-Run `yyx_normalize_3CHTGTS_tlx.20230501.pl` (see Usage prompts section for details in input and output). It will extract and count the junctions located in the specified `[signal_coordinate]` and exclude the junctions located in the specified `[rm_artifact_coordinate]`, and output to `<output_prefix>.junction_count.txt` and `<output_prefix>.signal_rm_artifact.tlx`. Then, it will do scaling normalization on the bigwig signal file, which will scale the signal junction number (excluding artifacts) to the specified `[normalized_to]` junctions.
+First, run `yyx_normalize_3CHTGTS_tlx.20230501.pl` to remove bait peaks which are variable due to self-ligation level (see Usage prompts section for details in input and output). It will extract and count the junctions located in the specified `[signal_coordinate]` and exclude the junctions located in the specified `[rm_artifact_coordinate]`, and output to `<output_prefix>.junction_count.txt` and `<output_prefix>.signal_rm_artifact.tlx`. Then, it will do scaling normalization on the bigwig signal file, which will scale the signal junction number (excluding artifacts) to the specified `[normalized_to]` junctions.
 
 Note: In order to reduce the impact of the level of self-ligation (circularization), you can visualize the original results in IGV to find out the `[rm_artifact_coordinate]` for the high peaks upstream of the bait-site, and then use this script to filter out these high peaks.
 
+Then, downsample the signal\_rm\_artifact.tlx files by `normalizeTLX_specific.py` (see Usage prompts section for details in input and output).
 
+Note: I added the code to fix the random seed to 1234567 in `normalizeTLX_specific.py` just for reproducibility of the demo dataset.  Users may change the random seed or remove it as they like.  Due to randomness in downsampling, the final number of downstream peak calling may vary a bit.
 
 ## Pipeline 2. 3C-HTGTS peak calling
 
@@ -29,6 +62,7 @@ Prerequisite R packages:
 Run `yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r` to collapse 3C-HTGTS junctions to the nearby enzyme cutting sites, and output the junction count on each cutting site.
 ```
 for smpl in AAA BBB; do
+ echo smpl=$smpl
  (date
  echo Rscript yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r $smpl*.tlx $smpl.CATG_dist10_filtered mm9_AJ851868ins.fa CATG 10 mm9AJ_CATGsites.bed
  time Rscript yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r $smpl*.tlx $smpl.CATG_dist10_filtered mm9_AJ851868ins.fa CATG 10 mm9AJ_CATGsites.bed
@@ -37,6 +71,8 @@ done
 time wait
 date
 ```
+Note: in some bash, '|&' (the shorthand of '2>&1 |') will prompt error '-bash: syntax error near unexpected token &'; it can be simply fixed by replacing '|&' by '2>&1 |'.
+
 The output `$smpl.CATG_dist10_filtered.bdg` will be the input of the next step.
 
 
@@ -46,6 +82,7 @@ Run `yyx_3CHTGTS_callpeak.20240104.r` to call peak regions for each sample.
 ```
 for w in 100; do
 for smpl in AAA BBB; do
+ echo smpl=$smpl
  (date
  echo Rscript yyx_3CHTGTS_callpeak.20240104.r $smpl.CATG_dist10_filtered.bdg $smpl.CATG_dist10_w${w}_signif $w
  time Rscript yyx_3CHTGTS_callpeak.20240104.r $smpl.CATG_dist10_filtered.bdg $smpl.CATG_dist10_w${w}_signif $w
@@ -154,6 +191,133 @@ You can load the final annotation output `$grp.peak_anno_CBE_E2A_GROseq.bed` int
 
 
 
+## Demo
+
+### 3C-HTGTS normalization
+
+(date
+echo python3 normalizeTLX_specific.py 200000 demo/BMpreB_Cer_rep1_result.tlx demo/BMpreB_Cer_rep2_result.tlx
+time python3 normalizeTLX_specific.py 200000 demo/BMpreB_Cer_rep1_result.tlx demo/BMpreB_Cer_rep2_result.tlx
+date) 2>&1 | tee demo/normalizeTLX_specific.log
+
+
+Run `yyx_normalize_3CHTGTS_tlx.20230501.pl` to remove bait peaks:
+```
+time for smpl in BMpreB_Cer_rep{1,2}; do
+echo smpl=$smpl
+(date
+echo perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.fa.fai demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
+time perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.fa.fai demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
+date) 2>&1 | cat >demo/${smpl}.yyx_normalize_3CHTGTS_tlx.log &
+done
+time wait
+date
+rm -f demo/BMpreB_Cer_rep?.*.{both,pos,neg}.{bw,bdg}
+```
+It may take about two minutes to run for one sample.
+
+Check the number of lines of the demo results by `wc -l demo/*.tlx`:
+```
+   44481 demo/BMpreB_Cer_rep1.signal_rm_artifact.tlx
+  200001 demo/BMpreB_Cer_rep1_result.200000.tlx
+   56253 demo/BMpreB_Cer_rep2.signal_rm_artifact.tlx
+  200001 demo/BMpreB_Cer_rep2_result.200000.tlx
+```
+
+Downsample the signal\_rm\_artifact.tlx files by `normalizeTLX_specific.py`:
+```
+(date
+echo python3 normalizeTLX_specific.py 40000 demo/BMpreB_Cer_rep1.signal_rm_artifact.tlx demo/BMpreB_Cer_rep2.signal_rm_artifact.tlx
+time python3 normalizeTLX_specific.py 40000 demo/BMpreB_Cer_rep1.signal_rm_artifact.tlx demo/BMpreB_Cer_rep2.signal_rm_artifact.tlx
+date) 2>&1 | tee demo/normalizeTLX_specific.log
+```
+It may take about one second to downsample.
+
+Check the number of lines of the demo results by `wc -l demo/*signal_rm_artifact*.tlx`:
+```
+   40001 demo/BMpreB_Cer_rep1.signal_rm_artifact.40000.tlx
+   44481 demo/BMpreB_Cer_rep1.signal_rm_artifact.tlx
+   40001 demo/BMpreB_Cer_rep2.signal_rm_artifact.40000.tlx
+   56253 demo/BMpreB_Cer_rep2.signal_rm_artifact.tlx
+```
+
+
+### 3C-HTGTS peak calling
+
+First, run `yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r` to align 3C-HTGTS junctions to enzyme cutting sites:
+```
+time for smpl in BMpreB_Cer_rep{1,2}; do
+ echo smpl=$smpl
+ (date
+ echo Rscript yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r demo/$smpl.signal_rm_artifact.40000.tlx demo/$smpl.CATG_dist10_filtered ../demo_reference/mm9.fa CATG 10 ../demo_reference/mm9_chr6_CATGsites.bed
+ time Rscript yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r demo/$smpl.signal_rm_artifact.40000.tlx demo/$smpl.CATG_dist10_filtered ../demo_reference/mm9.fa CATG 10 ../demo_reference/mm9_chr6_CATGsites.bed
+ date) 2>&1 | cat >demo/$smpl.CATG_dist10_filtered.log &
+done
+time wait
+date
+```
+It may take about half one minute to scan CATG (enzyme cutting sites) on the genome (if `mm9_chr6_CATGsites.bed` does not exist), and then about two minutes for each sample.
+
+Note: Due to file size limit (about 200MB) of github, I removed the genome file `../demo_reference/mm9.fa` and limited `mm9_CATGsites.bed` to chr6 as `../demo_reference/mm9_chr6_CATGsites.bed`. Users may download `mm9.fa.gz` from [UCSC](https://hgdownload.cse.ucsc.edu/goldenpath/mm9/bigZips/), then parse it to only keep the canonical chromosomes by `zless mm9.fa.gz | perl -ne 'BEGIN{ $so=0; } if(/^>/){ $so=0; if(/^>chr[^_]+$/){ $so=1; }} if($so){ print; }' >mm9.fa`, and generate fai index file by `samtools faidx mm9.fa`.
+
+Check the number of lines of the demo results by `wc -l demo/*.bdg`:
+```
+   10306 demo/BMpreB_Cer_rep1.CATG_dist10_filtered.bdg
+   10011 demo/BMpreB_Cer_rep2.CATG_dist10_filtered.bdg
+```
+
+Second, run `yyx_3CHTGTS_callpeak.20240104.r` to call peaks for each sample:
+```
+for w in 100; do
+for smpl in BMpreB_Cer_rep{1,2}; do
+ echo smpl=$smpl
+ (date
+ echo Rscript yyx_3CHTGTS_callpeak.20240104.r demo/$smpl.CATG_dist10_filtered.bdg demo/$smpl.CATG_dist10_w${w}_signif $w
+ time Rscript yyx_3CHTGTS_callpeak.20240104.r demo/$smpl.CATG_dist10_filtered.bdg demo/$smpl.CATG_dist10_w${w}_signif $w
+ date) 2>&1 | cat >demo/$smpl.CATG_dist10_w${w}_signif.log &
+done
+time wait
+date
+done
+```
+It may take about half one minute to call peak regions for each sample.
+
+Check the number of lines of the demo results by `wc -l demo/*signif*.bed`:
+```
+     450 demo/BMpreB_Cer_rep1.CATG_dist10_w100_signif.bed
+     131 demo/BMpreB_Cer_rep1.CATG_dist10_w100_signif.merged.bed
+     424 demo/BMpreB_Cer_rep2.CATG_dist10_w100_signif.bed
+     140 demo/BMpreB_Cer_rep2.CATG_dist10_w100_signif.merged.bed
+```
+
+Third, run `yyx_multi_bed_overlap.20240104.r` and `yyx_process_multi_bdg_to_robust.20240114.pl` to compare called peaks and get robust peaks among repeats
+```
+time echo "BMpreB_Cer BMpreB_Cer_rep{1,2}" | while read grp smpls; do
+ echo $grp $smpls
+ in=`eval ls demo/$smpls*.CATG_dist10_w100_signif.merged.bed`
+ out=demo/$grp
+ N=`echo $in | awk '{print NF}'`
+ echo $N $in
+ (date
+ echo Rscript yyx_multi_bed_overlap.20240104.r $out.multi $in
+ time Rscript yyx_multi_bed_overlap.20240104.r $out.multi $in
+ echo perl yyx_process_multi_bdg_to_robust.20240114.pl $out $out.multi.bed $in
+ time perl yyx_process_multi_bdg_to_robust.20240114.pl $out $out.multi.bed $in
+ date) 2>&1 | cat >$out.yyx_multi_bed_overlap.log
+done
+```
+It may take about 5 seconds to merge peaks and get robust peaks among repeats.
+
+Check the number of lines of the demo results by `wc -l demo/*robust*`:
+```
+     100 demo/BMpreB_Cer.robust.bdg
+     100 demo/BMpreB_Cer.robust.bed
+     100 demo/BMpreB_Cer.robust_avg_summit.bdg
+     100 demo/BMpreB_Cer.robust_summit.bdg
+```
+
+
+
 ## Usage prompts
 
 ### yyx\_normalize\_3CHTGTS\_tlx.20230501.pl
@@ -181,6 +345,17 @@ Final output:
 Author: Adam Yongxin Ye @ BCH
 Version: 0.1.3 (2023-05-01)
 ```
+
+
+### normalizeTLX\_specific.py
+
+```
+Usage: python3 normalizeTLX_specific.py <normalize_to> <input1.tlx> [input2.tlx] ...
+```
+Output:
+- <input1>.<normalize_to>.tlx
+- [input2].<normalize_to>.tlx
+
 
 
 ### yyx\_3CHTGTS\_tlx\_to\_CATG\_dist\_filtered\_bdg.20240102.r
