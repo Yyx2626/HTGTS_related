@@ -206,8 +206,8 @@ Run `yyx_normalize_3CHTGTS_tlx.20230501.pl` to remove bait peaks:
 time for smpl in BMpreB_Cer_rep{1,2}; do
 echo smpl=$smpl
 (date
-echo perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.fa.fai demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
-time perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.fa.fai demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
+echo perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.chrom.sizes demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
+time perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.chrom.sizes demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
 date) 2>&1 | cat >demo/${smpl}.yyx_normalize_3CHTGTS_tlx.log &
 done
 time wait
