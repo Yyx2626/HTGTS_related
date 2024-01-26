@@ -42,5 +42,7 @@ And replace `bin/TranslocPreprocess.pl` after installing [original HTGTS pipelin
 
 ### yyx\_fix\_multx.20230126.pl
 
+This script is intended to fix the output format of `fastq-multx`.
+
 Usage: ```yyx_fix_multx.20230126.pl <multx_folder_path> [should_run (default:0)]```
 

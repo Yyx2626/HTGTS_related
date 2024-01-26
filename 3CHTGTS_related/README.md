@@ -93,7 +93,7 @@ date
 done
 ```
 
-It will calculate the median with a moving window of 100 cutting sites (actually 101 sites: one center, 50 left, and 50 right sites). Then, it will do a Poisson test for each site, with the median as a conservative over-estimation of the lambda parameter of Poisson distribution. Peak summits will be called at the sites with Bonferroni-adjusted p-values < 0.05, and the range of peak region will be determined by progressively extending the two sides to the sites that have local minimum raw p-value and also the raw p-values >= 0.05. Nearby overlapping peak regions were merged as one peak region, and only the “best” (defined by lowest p-value) summit was kept after merging.
+It will calculate the median with a moving window of 100 cutting sites (actually 101 sites: one center, 50 left, and 50 right sites). Then, it will do a Poisson test for each site, with the median as a conservative over-estimation of the lambda parameter of Poisson distribution. Peak summits will be called at the sites with Bonferroni-adjusted p-values < 0.05, and the range of peak region will be determined by progressively extending the two sides to the sites that have local maximum raw p-value and also the raw p-values >= 0.05. Nearby overlapping peak regions were then merged as one peak region, and only the “best” (defined by lowest p-value) summit was kept after merging.
 
 The output `$smpl.CATG_dist10_w${w}_signif.merged.bed` will be the input of the next step.
 
@@ -333,6 +333,8 @@ Check the number of lines of the demo results by `wc -l demo/*robust*`:
 
 ### yyx\_normalize\_3CHTGTS\_tlx.20230501.pl
 
+This script is intended to extract 3C-HTGTS junctions within `[signal_coordinate]`, exclude junctions within `[rm_artifact_coordinate]` (e.g. self-ligation peaks upstream the bait); the output tlx file is `<output_prefix>.signal_rm_artifact.tlx`.  Then, it will do scaling normalization to output bdg or bw.  If you want to do downsampling normalization, please apply `normalizeTLX_specific.py` on `<output_prefix>.signal_rm_artifact.tlx`.
+
 ```
 Usage: yyx_normalize_3CHTGTS_tlx.20230501.pl <input.tlx> <chromSize> <output_prefix>
 	[signal_coordinate (default: all; example (Igk + nearby): chr6:64515000-73877000; or chr6)]
@@ -360,6 +362,8 @@ Version: 0.1.3 (2023-05-01)
 
 ### normalizeTLX\_specific.py
 
+This script is intended to do downsampling for input HTGTS tlx file(s).
+
 ```
 Usage: python3 normalizeTLX_specific.py <normalize_to> <input1.tlx> [input2.tlx] ...
 ```
@@ -370,6 +374,8 @@ Output:
 
 
 ### yyx\_3CHTGTS\_tlx\_to\_CATG\_dist\_filtered\_bdg.20240102.r
+
+This script is intended to scan enzyme cutting sites by motif (e.g. CATG for NlaIII) on genome, align 3C-HTGTS junctions to nearby enzyme cutting sites, and count junctions on enzyme cutting sites.
 
 ```
 Usage: Rscript yyx_3CHTGTS_tlx_to_CATG_dist_filtered_bdg.20240102.r <input.tlx> <output_preifx> <ref.fa>
@@ -387,6 +393,11 @@ Output:
 
 
 ### yyx\_3CHTGTS\_callpeak.20240104.r
+
+This script is intended to call 3C-HTGTS peaks by local Poisson tests on junction counts aligned to enzyme cutting sites.
+
+It will calculate the median with a moving window of `[local_idx_window_size (default: 100)]` cutting sites (actually 101 sites: one center, 50 left, and 50 right sites). Then, it will do a Poisson test for each site, with the median as a conservative over-estimation of the lambda parameter of Poisson distribution. Peak summits will be called at the sites with Bonferroni-adjusted p-values < 0.05, and the range of peak region will be determined by progressively extending the two sides to the sites that have local maximum raw p-value and also the raw p-values >= 0.05. Nearby overlapping peak regions were then merged as one peak region, and only the “best” (defined by lowest p-value) summit was kept after merging.
+
 ```
 Usage: Rscript yyx_3CHTGTS_callpeak.20240104.r <input.CATG_dist10_filtered.bdg> <output_preifx>
   [local_idx_window_size (default: 100)]
@@ -413,6 +424,9 @@ Output:
 
 
 ### yyx\_multi\_bed\_overlap.20240104.r
+
+This script is intended to merge regions from input bed/bdg files, and report each merged region is supported by how many repeats (and supported by which original regions in which repeat as name column in `<output_prefix>`.bed).
+
 ```
 Usage: Rscript yyx_multi_bed_overlap.20240104.r <output_prefix> <rep1.bed|bdg> <rep2.bed|bdg> ...
 ```
@@ -429,6 +443,9 @@ Output:
 
 
 ### yyx\_process\_multi\_bdg\_to\_robust.20240114.pl
+
+This script is intended to parse the repeats-merged peak regions (`<input.multi.bed>`, the result bed file of `yyx_multi_bed_overlap.20240104.r`), to only keep those robust peak regions supported by >50% repeats, and extract the summit information from the best (lowest p-value) supporting peak region.
+
 ```
 Usage: perl yyx_process_multi_bdg_to_robust.20240114.pl <output_prefix> <input.multi.bed>
 	<rep1.signif.merged.bed> <rep2.signif.merged.bed> ...
@@ -459,6 +476,9 @@ Author: Adam Yongxin Ye @ BCH
 
 
 ### yyx\_anno\_underlying\_features.20240105.r
+
+This script is intended to annotate the underlying features (defined in `<anno.bed|bdg|bw>`) for each query region (in `<query.bed|bdg>`).
+
 ```
 Usage: Rscript yyx_anno_underlying_features.20240105.r  <output_prefix> <should_abs_score> <query.bed|bdg> <anno.bed|bdg|bw>
 ```
@@ -471,6 +491,9 @@ Note:
 
 
 ### yyx\_overlapping\_bed\_to\_nonoverlapping\_bdg.20240105.pl
+
+This script is intended to convert overlapping bed to nonoverlapping bdg, mainly for final conversion to bw by `bedGraphToBigWig` (the next step, not included in this script).
+
 ```
 Usage: yyx_overlapping_bed_to_nonoverlapping_bdg.20240105.pl <input.sorted.bed> <overlapping_score_operator>
 Input:  <input.sorted.bed>
@@ -481,6 +504,7 @@ Options:  <overlapping_score_operator> can be one of the following options:
 Version: 0.1.2 (2024-01-05)
 Author: Adam Yongxin Ye @ BCH
 ```
+
 It will call bedops and bedmap in [BEDOPS toolkit](https://bedops.readthedocs.io/en/latest/index.html), which needs to be installed before using it.
 
 
