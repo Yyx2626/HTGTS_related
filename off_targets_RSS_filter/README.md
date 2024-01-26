@@ -149,3 +149,83 @@ Author: Adam Yongxin Ye @ BCH
 ```
 
 
+### yyx\_scan\_heptamer.20220727.pl
+
+```
+Usage: yyx_scan_heptamer.20220727.pl <sequence.fa>
+	[should_skip_all_0 (default:1)]
+Output: .tsv (8 columns)
+	1) chr
+	2) position (0-based)
+	3) forward base
+	4) forward heptamer
+	5) forward heptamer score
+	6) reverse base
+	7) reverse heptamer
+	8) reverse heptamer score
+Note:
+	This script will scan for
+		heptamer = CACAGTG
+	The 12/23 RSS score is simply calculated as:
+		match +2, transition +0, transversion +0
+	Score of first 3bp of heptamer (CAC) are multiplied by 10, and minus 58, so that
+		matching CAC only has score =  2
+		matching CACA has score = 4 = 2 + 2
+		matching CACAGTG has score = 10 = 2 + 4*2
+		CAC + random bases has expected score = 4 = 2+(2/4)*4
+
+Version: 0.1.0 (2022-07-27)
+Author: Adam Yongxin Ye @ BCH
+```
+
+### yyx\_HTGTS\_align.20200831.pl
+
+```
+Usage: yyx_HTGTS_align.20200831.pl <input.tlx> <ref.fa> <output_prefix>
+	[slop_bp_upstream (default:15)] [slop_bp_downstream (default:slop_bp_upstream)]
+	[motif (default: CACTGTG:GTG)] [aligned_shift_to_motif_pos (default: 6:2)]
+	[should_output_bw (default:1)] [yyx_convert_tlx_to_bw.pl] [yyx_bdg_extract_multiply.pl]
+
+Output:
+	<output_prefix>.bed
+	<output_prefix>.slop_*_*.<motif>_shift.bed
+	<output_prefix>.slop_*_*.<motif>_shift.tlx
+	<output_prefix>.slop_*_*.<motif>_pass.tlx
+	<output_prefix>.slop_*_*.<motif>_filtered.tlx
+	<output_prefix>.slop_*_*.<motif>_aligned.tlx
+
+Version: 0.1.0 (2020-08-31)
+Author: Adam Yongxin Ye @ BCH
+```
+
+### yyx\_convert\_tlx\_to\_bw.20200904.pl
+```
+Usage: yyx_convert_tlx_to_bw.20200904.pl <input.tlx> <chromSize> <output_prefix>
+	[should_strand (default:1)] [normalize_to (default:0)]
+	[yyx_bdg_extract_multiply.pl (required for normalization)]
+	[junction|prey (default:junction)]
+
+Author: Adam Yongxin Ye @ BCH
+Version: 0.1.1 (2020-09-04)
+```
+
+### yyx\_convert\_tlx\_to\_bw.20230919.pl
+```
+Usage: yyx_convert_tlx_to_bw.20230919.pl <input.tlx> <chromSize> <output_prefix>
+	[should_strand (default:1)] [normalize_to (default:0)]
+	[yyx_bdg_extract_multiply.pl (required for normalization)]
+	[junction|prey|bait|baitEnd (default:junction)]
+
+Author: Adam Yongxin Ye @ BCH
+Version: 0.1.2 (2023-09-19)
+```
+
+### yyx\_bdg\_extract\_multiply.20200120.pl
+```
+Usage: yyx_bdg_extract_multiply.20200120.pl <input.bdg|bw> <output.bdg> <multiply_factor> [chr] [start] [end]
+
+Version: 0.1.0 (2020-01-20)
+Author: Adam Yongxin Ye @ BCH
+```
+
+

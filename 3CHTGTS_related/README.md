@@ -19,7 +19,7 @@ Prerequisite tools in PATH:
 - [bedGraphToBigWig](https://hgdownload.soe.ucsc.edu/admin/exe/)
 
 Prerequisite R packages:
-- tidyverse
+- [tidyverse](https://www.tidyverse.org/)
 - [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html)
 - [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html)
 
@@ -353,8 +353,8 @@ Version: 0.1.3 (2023-05-01)
 Usage: python3 normalizeTLX_specific.py <normalize_to> <input1.tlx> [input2.tlx] ...
 ```
 Output:
-- <input1>.<normalize_to>.tlx
-- [input2].<normalize_to>.tlx
+- `<input1>`.`<normalize_to>`.tlx
+- `[input2]`.`<normalize_to>`.tlx
 
 
 
@@ -457,4 +457,19 @@ Output:
 Note:
 - For `<anno.bed>`, it will append four columns: (anno) count, density, highest signal, average signal
 - For `<anno.bdg|bw>`, it will append two columns: (anno) highest signal, average signal
+
+
+### yyx\_overlapping\_bed\_to\_nonoverlapping\_bdg.20240105.pl
+```
+Usage: yyx_overlapping_bed_to_nonoverlapping_bdg.20240105.pl <input.sorted.bed> <overlapping_score_operator>
+Input:  <input.sorted.bed>
+Output:  STDOUT
+Options:  <overlapping_score_operator> can be one of the following options:
+	abs_max, abs_min, max, min, mean, sum, bp_switch, comma_separated
+
+Version: 0.1.2 (2024-01-05)
+Author: Adam Yongxin Ye @ BCH
+```
+It will call bedops and bedmap in [BEDOPS toolkit](https://bedops.readthedocs.io/en/latest/index.html), which need to be installed before using it.
+
 
