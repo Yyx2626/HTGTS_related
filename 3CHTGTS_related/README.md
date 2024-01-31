@@ -42,13 +42,14 @@ Prerequisite tools in PATH:
 - bedtools
 - bedGraphToBigWig
 
-First, run `yyx_normalize_3CHTGTS_tlx.20230501.pl` to remove bait peaks which are variable due to self-ligation level (see Usage prompts section for details in input and output). It will extract and count the junctions located in the specified `[signal_coordinate]` and exclude the junctions located in the specified `[rm_artifact_coordinate]`, and output to `<output_prefix>.junction_count.txt` and `<output_prefix>.signal_rm_artifact.tlx`. Then, it will do scaling normalization on the bigwig signal file, which will scale the signal junction number (excluding artifacts) to the specified `[normalized_to]` junctions.
+First, run `yyx_normalize_3CHTGTS_tlx.20240131.pl` to remove bait peaks which are variable due to self-ligation level (see Usage prompts section for details of input and output); for example, `perl yyx_normalize_3CHTGTS_tlx.20240131.pl input.tlx mm9.chrom.sizes output chr6:64515000-73877000 chr6:70659550-70659700` as shown in Demo section. It will extract and count the junctions located in the specified `[signal_coordinate]` and exclude the junctions located in the specified `[rm_artifact_coordinate]`, and output to `<output_prefix>.junction_count.txt` and `<output_prefix>.signal_rm_artifact.tlx`. Then, it will do scaling normalization on the bigwig signal file, which will scale the signal junction number (excluding artifacts) to the specified `[normalized_to]` junctions. You can also see the number of junctions of signal or artifact in the output`.signal_rm_artifact.tlx` file.
 
 Note: In order to reduce the impact of the level of self-ligation (circularization), you can visualize the original results in IGV to find out the `[rm_artifact_coordinate]` for the high peaks upstream of the bait-site, and then use this script to filter out these high peaks.
 
-Then, downsample the signal\_rm\_artifact.tlx files by `normalizeTLX_specific.py` (see Usage prompts section for details in input and output).
+Then, downsample the signal\_rm\_artifact.tlx files by `normalizeTLX_specific.py` or `normalizeTLX.20211118.pl` (see Usage prompts section for details of input and output). For example, `python3 normalizeTLX_specific.py 40000 input.tlx` will do downsampling normalization from the junction number in `input.tlx` to 40000 and output the tlx file with filename `input.40000.tlx`; while `perl normalizeTLX.20211118.pl 87654 40000 input.tlx` will do downsampling normalization from your specified 87654 (which can be the number of junctions or the number of reads (uncut reads + result junctions for HTGTS-V(D)J-seq) to 40000 and output the tlx file with defaul filename `input.from_87654_to_40000.tlx`.
 
 Note: I added the code to fix the random seed to 1234567 in `normalizeTLX_specific.py` just for reproducibility of the demo dataset.  Users may change the random seed or remove it as they like.  Due to randomness in downsampling, the final number of downstream peak calling may vary a bit.
+
 
 ## Pipeline 2. 3C-HTGTS peak calling
 
@@ -212,13 +213,13 @@ time python3 normalizeTLX_specific.py 200000 demo/BMpreB_Cer_rep1_result.tlx dem
 date) 2>&1 | tee demo/normalizeTLX_specific.log
 
 
-Run `yyx_normalize_3CHTGTS_tlx.20230501.pl` to remove bait peaks:
+Run `yyx_normalize_3CHTGTS_tlx.20240131.pl` to remove bait peaks:
 ```
 time for smpl in BMpreB_Cer_rep{1,2}; do
 echo smpl=$smpl
 (date
-echo perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.chrom.sizes demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
-time perl yyx_normalize_3CHTGTS_tlx.20230501.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.chrom.sizes demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
+echo perl yyx_normalize_3CHTGTS_tlx.20240131.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.chrom.sizes demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
+time perl yyx_normalize_3CHTGTS_tlx.20240131.pl demo/${smpl}_result.200000.tlx ../demo_reference/mm9.chrom.sizes demo/${smpl} chr6:64515000-73877000 chr6:70659550-70659700
 date) 2>&1 | cat >demo/${smpl}.yyx_normalize_3CHTGTS_tlx.log &
 done
 time wait
@@ -331,12 +332,12 @@ Check the number of lines of the demo results by `wc -l demo/*robust*`:
 
 ## Usage prompts
 
-### yyx\_normalize\_3CHTGTS\_tlx.20230501.pl
+### yyx\_normalize\_3CHTGTS\_tlx.20240131.pl
 
-This script is intended to extract 3C-HTGTS junctions within `[signal_coordinate]`, exclude junctions within `[rm_artifact_coordinate]` (e.g. self-ligation peaks upstream the bait); the output tlx file is `<output_prefix>.signal_rm_artifact.tlx`.  Then, it will do scaling normalization to output bdg or bw.  If you want to do downsampling normalization, please apply `normalizeTLX_specific.py` on `<output_prefix>.signal_rm_artifact.tlx`.
+This script is intended to extract 3C-HTGTS junctions within `[signal_coordinate]`, exclude junctions within `[rm_artifact_coordinate]` (e.g. self-ligation peaks upstream the bait); the output tlx file is `<output_prefix>.signal_rm_artifact.tlx`.  Then, it will do scaling normalization to output bdg or bw.  If you want to do downsampling normalization, please apply `normalizeTLX_specific.py` on `<output_prefix>.signal_rm_artifact.tlx`. You can also see the number of junctions of signal or artifact in `<output_prefix>.signal_rm_artifact.tlx`.
 
 ```
-Usage: yyx_normalize_3CHTGTS_tlx.20230501.pl <input.tlx> <chromSize> <output_prefix>
+Usage: yyx_normalize_3CHTGTS_tlx.20240131.pl <input.tlx> <chromSize> <output_prefix>
 	[signal_coordinate (default: all; example (Igk + nearby): chr6:64515000-73877000; or chr6)]
 	[rm_artifact_coordinate (default: none; example: chr6:70675300-70675400 or chr6:1234-5678,chr6:2333-6666)]
 	[normalized_to (default: 1000000)] [remove_intermediate_files (default: 1)]
@@ -356,13 +357,13 @@ Final output:
 	<output_prefix>.signal_rm_artifact.tlx
 
 Author: Adam Yongxin Ye @ BCH
-Version: 0.1.3 (2023-05-01)
+Version: 0.1.4 (2024-01-31)
 ```
 
 
 ### normalizeTLX\_specific.py
 
-This script is intended to do downsampling for input HTGTS tlx file(s).
+This script is intended to do downsampling normalization for input HTGTS tlx file(s).
 
 ```
 Usage: python3 normalizeTLX_specific.py <normalize_to> <input1.tlx> [input2.tlx] ...
@@ -370,6 +371,20 @@ Usage: python3 normalizeTLX_specific.py <normalize_to> <input1.tlx> [input2.tlx]
 Output:
 - `<input1>`.`<normalize_to>`.tlx
 - `[input2]`.`<normalize_to>`.tlx
+
+
+### normalizeTLX.20211118.pl
+
+This script is intended to do downsampling normalization for one input HTGTS tlx file. It can normalize for total junctions or for total reads, as long as you specify the corresponding `<from_number>` as total junction number or total reads number.
+
+```
+Usage: ./normalizeTLX.20211118.pl <from_number> <to_number> <input.tlx>
+	[output.tlx(default:<input>.from_<from>_to_<to>.tlx)]
+	[random_seed(default:1234567)]
+
+Version: 0.1.0 (2021-11-18)
+Author: Adam Yongxin Ye @ BCH
+```
 
 
 

@@ -5,7 +5,7 @@ use warnings;
 
 my $version = '
 Author: Adam Yongxin Ye @ BCH
-Version: 0.1.3 (2023-05-01)
+Version: 0.1.4 (2024-01-31)
 ';
 my $usage = "Usage: $0 <input.tlx> <chromSize> <output_prefix>
 	[signal_coordinate (default: all; example (Igk + nearby): chr6:64515000-73877000; or chr6)]
@@ -338,14 +338,14 @@ sub parse_coordinate_string{
 		return (map { parse_coordinate_string($_); } @G);
 	}
 	if($input_coordinate_str =~ /all/i){
-		return ("all", -1, -1);
+		return ["all", -1, -1];
 	}
 	if($input_coordinate_str =~ /none/i){
-		return ("none", -1, -1);
+		return ["none", -1, -1];
 	}
 	my @F = split(/[:-]/, $input_coordinate_str);
 	if(@F == 0){
-		return ("none", -1, -1);
+		return ["none", -1, -1];
 	}
 	while(@F < 3){
 		push(@F, -1);
@@ -526,11 +526,14 @@ sub parse_tlx_to_count_and_bed{
 				if(!$isSignal){
 					print STDERR "Warning: within artifact region but outside signal region for line $rowidx\n";
 				}
-			}else{
-				if($isSignal){
-					$signalRmArtifact_count++;
-					print OUT6 join("\t", @F)."\n";
-				}
+			}
+		}
+		if(!$anyRmArtifact || !$isArtifact){
+			if($isSignal){
+				$signalRmArtifact_count++;
+				print OUT6 join("\t", @F)."\n";
+			}
+			if($anyRmArtifact){
 				if($strand eq "+"){
 					print OUT11 join("\t", $chr, $start, $end, $name, $rowidx, $strand)."\n";
 				}elsif($strand eq "-"){
