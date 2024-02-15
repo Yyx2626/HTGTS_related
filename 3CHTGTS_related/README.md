@@ -39,8 +39,8 @@ BiocManager::install("GenomicRanges")
 ## Pipeline 1. 3C-HTGTS normalization
 
 Prerequisite tools in PATH:
-- bedtools
-- bedGraphToBigWig
+- [bedtools](https://bedtools.readthedocs.io/en/latest/content/installation.html)
+- [bedGraphToBigWig](https://hgdownload.soe.ucsc.edu/admin/exe/)
 
 First, run `yyx_normalize_3CHTGTS_tlx.20240131.pl` to remove bait peaks which are variable due to self-ligation level (see Usage prompts section for details of input and output), for example, `perl yyx_normalize_3CHTGTS_tlx.20240131.pl <input.tlx> <chrom.sizes> <output_prefix> [signal_coordinate] [rm_artifact_coordinate]` (as shown in Demo section). It will extract and count the junctions located in the specified `[signal_coordinate]` and exclude the junctions located in the specified `[rm_artifact_coordinate]`, and output to `<output_prefix>.junction_count.txt` and `<output_prefix>.signal_rm_artifact.tlx`. Then, it will do scaling normalization on the bigwig signal file, which will scale the signal junction number (excluding artifacts) to the specified `[normalized_to]` junctions. You can also see the number of junctions of signal or artifact in the output`.signal_rm_artifact.tlx` file.
 
@@ -54,9 +54,9 @@ Note: I added the code to fix the random seed to 1234567 in `normalizeTLX_specif
 ## Pipeline 2. 3C-HTGTS peak calling
 
 Prerequisite R packages:
-- tidyverse
-- GenomicRanges
-- Biostrings
+- [tidyverse](https://www.tidyverse.org/)
+- [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html)
+- [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html)
 
 ### Step 1. Collapse (align) 3C-HTGTS junctions to the nearby enzyme cutting sites (CATG by NlaIII)
 

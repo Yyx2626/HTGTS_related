@@ -15,8 +15,8 @@ Unlix-like, such as:
 - MacOS
 
 Prerequisite tools in PATH:
-- bedtools
-- bedGraphToBigWig
+- [bedtools](https://bedtools.readthedocs.io/en/latest/content/installation.html)
+- [bedGraphToBigWig](https://hgdownload.soe.ucsc.edu/admin/exe/)
 
 Prerequisite perl packages:
 - Text::CSV
