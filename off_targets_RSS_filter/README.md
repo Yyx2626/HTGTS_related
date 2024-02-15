@@ -239,6 +239,8 @@ Author: Adam Yongxin Ye @ BCH
 Version: 0.1.1 (2020-09-04)
 ```
 
+It will call `bedGraphToBigWig` to convert bdg (bedgraph) files to bw files.
+
 ### yyx\_convert\_tlx\_to\_bw.20230919.pl
 
 This script is intended to convert a tlx file to a bw file: the depth of pileup of junctions/preys/bait/baitEnd.
@@ -266,7 +268,5 @@ Usage: yyx_bdg_extract_multiply.20200120.pl <input.bdg|bw> <output.bdg> <multipl
 Version: 0.1.0 (2020-01-20)
 Author: Adam Yongxin Ye @ BCH
 ```
-
-It will call `bedGraphToBigWig` to convert bdg (bedgraph) files to bw files.
 
 
