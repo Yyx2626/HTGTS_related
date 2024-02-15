@@ -14,6 +14,10 @@ Unlix-like, such as:
 - Linux
 - MacOS
 
+Prerequisite tools in PATH:
+- bedtools
+- bedGraphToBigWig
+
 Prerequisite perl packages:
 - Text::CSV
 
@@ -216,7 +220,9 @@ Version: 0.1.0 (2020-08-31)
 Author: Adam Yongxin Ye @ BCH
 ```
 
-The output files: `*_shift.tlx` just appends 3 columns for annotation of the shift information to nearby heptamer or CAC. Then, `*_shift.tlx` is separated into `*_pass.tlx` (nearby CAC is found) and `*_filtered.tlx` (no nearby CAC). Finally, `*_aligned.tlx` is derived from `*_pass.tlx` with Junction coordinate moved to the start position of CAC.
+It will call `bedtools slop` and `bedtools getfasta` to extract the nearby genomic sequences.
+
+The output files: `*_shift.tlx` just appends 3 annotation columns for the shift information to nearby heptamer or CAC. Then, `*_shift.tlx` is separated into `*_pass.tlx` (nearby CAC is found) and `*_filtered.tlx` (no nearby CAC). Finally, `*_aligned.tlx` is derived from `*_pass.tlx` with Junction coordinate moved to the start position of CAC.
 
 
 ### yyx\_convert\_tlx\_to\_bw.20200904.pl
@@ -247,9 +253,12 @@ Author: Adam Yongxin Ye @ BCH
 Version: 0.1.2 (2023-09-19)
 ```
 
+It will call `bedGraphToBigWig` to convert bdg (bedgraph) files to bw files.
+
+
 ### yyx\_bdg\_extract\_multiply.20200120.pl
 
-This script is intended to scaling a bdg (bedgraph) file; for example, `<multiply_factor>` = -1 to make the values negative.
+This script is intended to scaling a bdg (bedgraph) file; for example, `<multiply_factor>` = -1 to change the sign of values (make the values negative or positive).
 
 ```
 Usage: yyx_bdg_extract_multiply.20200120.pl <input.bdg|bw> <output.bdg> <multiply_factor> [chr] [start] [end]
@@ -257,5 +266,7 @@ Usage: yyx_bdg_extract_multiply.20200120.pl <input.bdg|bw> <output.bdg> <multipl
 Version: 0.1.0 (2020-01-20)
 Author: Adam Yongxin Ye @ BCH
 ```
+
+It will call `bedGraphToBigWig` to convert bdg (bedgraph) files to bw files.
 
 
