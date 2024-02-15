@@ -125,6 +125,9 @@ Version: 0.1.1 (2021-01-02)
 Author: Adam Yongxin Ye @ BCH
 ```
 
+Therefore, if good RSS is defined by score >= 20, it means matching CAC + additional >= 9 bp of the remaining ideal heptamer AGTG and/or nonamer ACAAAACC in the context of a 12-or-23-bp spacer.
+
+
 ### yyx\_scan\_heptamer.20220727.pl
 
 This script is intended to scan all RSS heptamer starting with CAC on the genome sequence, and give each site a score according to the number of matches to the ideal heptamer CACAGTG.
@@ -186,6 +189,8 @@ Version: 0.1.2 (2021-11-02)
 Author: Adam Yongxin Ye @ BCH
 ```
 
+Note: theoretically, only coding end (CE) may be resected, while signal end (SE) will not. Therefore, this pipeline only allows one-direction searching for CAC from the Junction site on genome: searching for GTG in upstream 15bp ~ downstream 0bp for CE, or searching for CAC in upstream 0bp ~ downstream 15bp for SE.
+
 
 ### yyx\_HTGTS\_align.20200831.pl
 
@@ -210,6 +215,9 @@ Output:
 Version: 0.1.0 (2020-08-31)
 Author: Adam Yongxin Ye @ BCH
 ```
+
+The output files: `*_shift.tlx` just appends 3 columns for annotation of the shift information to nearby heptamer or CAC. Then, `*_shift.tlx` is separated into `*_pass.tlx` (nearby CAC is found) and `*_filtered.tlx` (no nearby CAC). Finally, `*_aligned.tlx` is derived from `*_pass.tlx` with Junction coordinate moved to the start position of CAC.
+
 
 ### yyx\_convert\_tlx\_to\_bw.20200904.pl
 
