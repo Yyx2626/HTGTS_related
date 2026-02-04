@@ -434,6 +434,7 @@ Output:
 - `<output_prefix>`.merged.bed
 - `<output_prefix>`.merged.read\_count.bdg
 - `<output_prefix>`.merged.log10\_pVal.bdg
+
   Format for bed file:
     Column 1-3: 	genomic coordinate of the called peak region
     Column 4:   	name = '.'
