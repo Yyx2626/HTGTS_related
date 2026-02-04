@@ -1,9 +1,15 @@
 # 3CHTGTS_related
 
-Some scripts related to 3C-HTGTS normalization and peak calling
+Scripts related to 3C-HTGTS normalization and peak calling
 
 Author: Adam Yongxin Ye @ Boston Children's Hospital / Harvard Medical School
 
+License: MIT license
+
+
+## Citation
+
+Zhang Y, Li X, Ba Z, Lou J, Gaertner KE, Zhu T, Lin X, Ye AY, Alt FW, Hu H. Molecular basis for differential Igk versus Igh V(D)J joining mechanisms. Nature. 2024 Jun;630(8015):189-197. doi: 10.1038/s41586-024-07477-y. Epub 2024 May 29. PMID: 38811728; PMCID: PMC11153149.
 
 
 ## Installation

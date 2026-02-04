@@ -1,8 +1,14 @@
 # Igk_specific_anno_and_filter
-Some scripts related to Igk-specific junctional annotation and filtering pipeline
+Scripts related to mouse Igk-specific junctional annotation and filtering pipeline
 
 Author: Adam Yongxin Ye @ Boston Children's Hospital / Harvard Medical School
 
+License: MIT license
+
+
+## Citation
+
+(in submission, TBD)
 
 
 ## Installation
@@ -68,7 +74,7 @@ For demo:
 (date
 echo perl yyx_tlx_filter_many_prey_mut.20260112.pl demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.pass.tlx ../demo_reference/mm9.fa 2 3 22 demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.maxVar2_prey_3_22.filtered_out.tlx >demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.maxVar2_prey_3_22.pass.tlx
 time perl yyx_tlx_filter_many_prey_mut.20260112.pl demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.pass.tlx ../demo_reference/mm9.fa 2 3 22 demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.maxVar2_prey_3_22.filtered_out.tlx >demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.maxVar2_prey_3_22.pass.tlx
-date)
+date) 2>&1 | tee demo/demo.maxBdelLen5_maxPdelLen7_maxInsLen2.maxVar2_prey_3_22.log
 ```
 It may take around 1.5 minutes to read the reference genome and realign to check mutations.
 
