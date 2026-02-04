@@ -21,6 +21,7 @@ Unlix-like, such as:
 
 Users can download and run these perl scripts by `perl xxx.pl` directly in this folder. Or users may move or copy the scripts into any of the folders in their PATH (environmental variable, which can be seen be `echo $PATH`), then the scripts can be directly run by `xxx.pl`.
 
+Typical Installation Time: Downloading the scripts and setting up the environment normally takes less than a few minutes on a standard Linux or MacOS system. No additional dependencies or compilation steps are required.
 
 
 ## Pipeline with Demo
